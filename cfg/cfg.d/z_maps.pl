@@ -11,42 +11,40 @@ $c->{eprints_loc_limit} = 30;
 
 # Trigger to load the google maps apiv3 with drawing and location libraries enabled
 # and the jQuery 1.11.0 min library + jQueryUI
-$c->add_trigger( EP_TRIGGER_DYNAMIC_TEMPLATE , sub
-{	
-	my( %args ) = @_;
 
-	my( $repo, $pins ) = @args{qw/ repository pins/};
-	
-	$pins->{"utf-8.head"} = "" if( !exists $pins->{"utf-8.head"} );
+$c->add_trigger( $EPrints::Plugin::Stats::EP_TRIGGER_DYNAMIC_TEMPLATE, sub
+{
+        my( %args ) = @_;
 
-	$pins->{"utf-8.map_view"} = "" if( !exists $pins->{"utf-8.map_view"} );
+        my( $repo, $pins ) = @args{qw/ repository pins/};
 
-	my $protocol = $repo->get_secure ? 'https':'http';
-	my $base_url = $c->{base_url};
-	
-	$pins->{"utf-8.head"} .= <<jQuery;
-	
+        my $protocol = $repo->get_secure ? 'https':'http';
 
-<!-- jQuery -->
-<script type="text/javascript" src="$protocol://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        my $head = $repo->make_doc_fragment;
 
-jQuery
+        print STDERR "in maps trigger\n";
+        $head->appendChild( $repo->make_javascript( undef,
+                src =>"$protocol://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
+        ) );
 
-	$pins->{"utf-8.head"} .= <<jQueryUI;
+        $head->appendChild( $repo->make_javascript( undef,
+                src=>"$protocol://ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"
 
-<!-- jQueryUI -->
-<script type="text/javascript" src="$protocol://ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+        ) );
 
-jQueryUI
+        $head->appendChild( $repo->make_javascript( undef,
+                src => "$protocol://maps.googleapis.com/maps/api/js?libraries=drawing,places&key=AIzaSyBoGhuQDxdI-KpbzZKzxNoZvnejwPk5te0"
+        ) );
 
-	$pins->{"utf-8.head"} .= <<GMAPS;
+        $head->appendChild( $repo->make_javascript( undef,
+                src => "$protocol://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",
+                integrity => "sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS",
+                crossorigin => "anonymous"
+        ) );
 
-<!-- GMAPS -->
-<script type="text/javascript" src="$protocol://maps.googleapis.com/maps/api/js?libraries=drawing,places"></script>
-
-GMAPS
-
-	$pins->{"utf-8.map_view"} .= <<MapView;
+        $pins->{"utf-8.map_view"} = "" if( !exists $pins->{"utf-8.map_view"} );
+        my $base_url = $c->{base_url};
+        $pins->{"utf-8.map_view"} .= <<MapView;
 
 <!-- MapView -->
 <li>
@@ -56,6 +54,21 @@ GMAPS
 
 MapView
 
-	return EP_TRIGGER_OK;
-});
+        if( defined $pins->{'utf-8.head'} )
+        {
+                $pins->{'utf-8.head'} .= $repo->xhtml->to_xhtml( $head );
+        }
+
+        if( defined $pins->{head} )
+        {
+                $head->appendChild( $pins->{head} );
+                $pins->{head} = $head;
+        }
+        else
+        {
+                $pins->{head} = $head;
+        }
+
+        return EP_TRIGGER_OK;
+} );
 
