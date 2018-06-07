@@ -6,4 +6,8 @@
 	<epp:phrase id="cgi/MapView:title">Geographical location</epp:phrase>
 	<epp:phrase id="cgi/MapView:map_warning">Map pins represent a geographic location relevant to the study. E.g. the broad area in which data collection took place.</epp:phrase>
 
+    <epp:phrase id="Plugin/InputForm/Surround/Map_surround:show_help"><epc:pin name="link"><img alt="+" title="Show help" src="{$config{rel_path}}/style/images/help.gif" border="0"/></epc:pin></epp:phrase>
+    <epp:phrase id="Plugin/InputForm/Surround/Map_surround:hide_help"><epc:pin name="link"><img alt="-" title="Hide help" src="{$config{rel_path}}/style/images/minus.png" border="0"/></epc:pin></epp:phrase>
+    <epp:phrase id="eprint_fieldhelp_bounding_box">Please use the map above to add points or draw rectangles to show the locations associated with your data.</epp:phrase>
+
 </epp:phrases>
